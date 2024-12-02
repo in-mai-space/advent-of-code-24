@@ -1,29 +1,31 @@
-fn main() {    
-    // both approaches is O(nlogn): sorting is O(nlogn), while map and reduce is O(n)
-    let for_loop = for_loop_approach(&[3, 4, 2, 1, 3, 3], &[4, 3, 5, 3, 9, 3]);
-    let zip = zipping_approach(&[3, 4, 2, 1, 3, 3], &[4, 3, 5, 3, 9, 3]);
+mod input;
 
-    println!("{for_loop}");
-    println!("{zip}");
-}
+fn main() {   
+    let data = input::INPUT;
 
-fn for_loop_approach(arr1: &[i32], arr2: &[i32]) -> i32 {
-    let mut sorted_arr1 = arr1.to_vec();
-    sorted_arr1.sort();
-    let mut sorted_arr2 = arr2.to_vec();
-    sorted_arr2.sort();
+    let mut column1: Vec<i32> = Vec::new();
+    let mut column2: Vec<i32> = Vec::new();
 
-    let mut distance: i32 = 0;
+    for line in data.lines() {
+        if line.trim().is_empty() {
+            continue;
+        }
 
-    for (index, _) in sorted_arr1.iter().enumerate() {
-        if let (Some(&value1), Some(&value2)) = (sorted_arr1.get(index), sorted_arr2.get(index)) {
-            distance += (value2 - value1).abs()
+        let parts: Vec<&str> = line.split_whitespace().collect();
+        if let (Some(&num1), Some(&num2)) = (parts.get(0), parts.get(1)) {
+            column1.push(num1.parse::<i32>().unwrap());
+            column2.push(num2.parse::<i32>().unwrap());
         }
     }
-    distance
+
+    let total_distance = total_distance(&column1, &column2);
+    println!("Distance: {total_distance}");
+
+    let similarity_score = similarity_score(&column1, &column2);
+    println!("Similarity score: {similarity_score}");
 }
 
-fn zipping_approach(arr1: &[i32], arr2: &[i32]) -> i32 {
+fn total_distance(arr1: &[i32], arr2: &[i32]) -> i32 {
     let mut sorted_arr1 = arr1.to_vec();
     sorted_arr1.sort();
     let mut sorted_arr2 = arr2.to_vec();
@@ -36,6 +38,20 @@ fn zipping_approach(arr1: &[i32], arr2: &[i32]) -> i32 {
     distance
 }
 
+fn similarity_score(arr1: &[i32], arr2: &[i32]) -> i32 {
+    let mut similarity_score = 0;
+
+    for left_item in arr1.iter() {
+        for right_item in arr2.iter() {
+            if left_item == right_item {
+                similarity_score += right_item;
+            }
+        }
+    }
+
+    similarity_score
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -44,7 +60,13 @@ mod tests {
     fn test_total_distance() {
         let arr1 = [3, 4, 2, 1, 3, 3];
         let arr2 = [4, 3, 5, 3, 9, 3];
-        assert_eq!(for_loop_approach(&arr1, &arr2), 11);
-        assert_eq!(zipping_approach(&arr1, &arr2), 11);
+        assert_eq!(total_distance(&arr1, &arr2), 11);
+    }
+
+    #[test]
+    fn test_similarity_score() {
+        let arr1 = [3, 4, 2, 1, 3, 3];
+        let arr2 = [4, 3, 5, 3, 9, 3];
+        assert_eq!(similarity_score(&arr1, &arr2), 31);
     }
 }
